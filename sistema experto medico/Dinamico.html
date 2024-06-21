@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Diagnosis</title>
+  <script src="browser.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(179, 122, 122, 0.1);
+    }
+
+    .question {
+      display: none;
+      margin-bottom: 15px;
+    }
+
+    .question label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .question input {
+      transform: scale(1.2);
+      margin-right: 10px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .button:hover {
+      background-color: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e7f5e9;
+      border: 1px solid #c3e6cb;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+  <h1>Health Diagnosis</h1>
+  <form id="diagnosisForm">
+    <!-- Las preguntas se generarán aquí -->
+  </form>
+  <div class="buttons">
+    <button id="prev" class="button">Anterior</button>
+    <button id="next" class="button">Siguiente</button>
+    <button id="execute" class="button" style="display:none;">Diagnose</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    window.onload = () => {
+      const neuronalNetwork = new brain.NeuralNetwork();
+
+      const data = [
+        { input: { "fiebre": 1, "tos": 1, "dolorCabeza": 1, 'escalofrios': 1, 'estornudos': 1, 'dolorGarganta': 1}, output: { "gripe": 1 } },
+        { input: { "fiebre": 1, "tos": 1, "dificultadRespiratoria": 1, 'fatiga': 1, 'perdidaOlfato': 1}, output: { "COVID-19": 1 } },
+        { input: { "dolorCabeza": 1, "sensibilidadLuz": 1, "nauseas": 1, 'vomito': 1, 'fatiga': 1}, output: { "migrana": 1 } },
+        { input: { "sedExcesiva": 1, "hambreExcesiva": 1, "orinaFrecuente": 1, 'malAliento': 1, 'cicatrizacionLenta': 1 }, output: { "diabetes": 1 } },
+        { input: { "dolorCabeza": 1, "dificultadRespiratoria": 1, "dolorPecho": 1, 'ansiedad': 1, 'mareos': 1}, output: { "hipertension": 1 } },
+        { input: { "tos": 1, "dificultadRespiratoria": 1, "sibilancias": 1, 'fatiga': 1, 'desmayos': 1 }, output: { "asma": 1 } },
+        { input: { "dolorArticulaciones": 1, "rigidezArticulaciones": 1, "inflamacionArticulaciones": 1, 'enrojecimiento': 1 }, output: { "artritis": 1 } },
+        { input: { "perdidaMemoria": 1, "confusion": 1, "dificultadHablar": 1 }, output: { "enfermedadDeAlzheimer": 1 } },
+        { input: { "bultoSenos": 1, "cambioTamañoSenos": 1, "dolorSenos": 1 }, output: { "cancerDeMama": 1 } },
+        { input: { "tos": 1, "dolorPecho": 1, "perdidaPeso": 1 }, output: { "cancerDePulmon": 1 } },
+      ];
+
+      let lista_preguntas = [
+        ['¿Tienes fiebre superior a 38 grados?', 'fiebre'],
+        ['¿Tienes tos seca?', 'tos'],
+        ['¿Tienes dolor de cabeza?', 'dolorCabeza'],
+        ['¿Tienes escalofríos?', 'escalofrios'],
+        ['¿Tienes estornudos?', 'estornudos'],
+        ['¿Tienes dolor de garganta?', 'dolorGarganta'],
+        ['¿Tienes dificultad para respirar?', 'dificultadRespiratoria'],
+        ['¿Tienes fatiga?', 'fatiga'],
+        ['¿Tienes pérdida de olfato?', 'perdidaOlfato'],
+        ['¿Tienes sensibilidad a la luz?', 'sensibilidadLuz'],
+        ['¿Tienes náuseas?', 'nauseas'],
+        ['¿Tienes vómito?', 'vomito'],
+        ['¿Tienes sed excesiva?', 'sedExcesiva'],
+        ['¿Tienes hambre excesiva?', 'hambreExcesiva'],
+        ['¿Orinas frecuentemente?', 'orinaFrecuente'],
+        ['¿Tienes mal aliento?', 'malAliento'],
+        ['¿Tienes cicatrización lenta?', 'cicatrizacionLenta'],
+        ['¿Tienes dolor de pecho?', 'dolorPecho'],
+        ['¿Tienes ansiedad?', 'ansiedad'],
+        ['¿Tienes mareos?', 'mareos'],
+        ['¿Tienes sibilancias?', 'sibilancias'],
+        ['¿Tienes desmayos?', 'desmayos'],
+        ['¿Tienes dolor en las articulaciones?', 'dolorArticulaciones'],
+        ['¿Tienes rigidez en las articulaciones?', 'rigidezArticulaciones'],
+        ['¿Tienes inflamación en las articulaciones?', 'inflamacionArticulaciones'],
+        ['¿Tienes enrojecimiento en las articulaciones?', 'enrojecimiento'],
+        ['¿Tienes pérdida de memoria?', 'perdidaMemoria'],
+        ['¿Tienes confusión?', 'confusion'],
+        ['¿Tienes dificultad para hablar?', 'dificultadHablar'],
+        ['¿Tienes bultos en los senos?', 'bultoSenos'],
+        ['¿Tienes cambios en el tamaño de los senos?', 'cambioTamañoSenos'],
+        ['¿Tienes dolor en los senos?', 'dolorSenos'],
+        ['¿Tienes pérdida de peso?', 'perdidaPeso'],
+      ];
+
+      // Generar preguntas en el formulario
+      const form = document.getElementById('diagnosisForm');
+      lista_preguntas.forEach(([pregunta, id]) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        const label = document.createElement('label');
+        label.textContent = pregunta;
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.name = id;
+        div.appendChild(label);
+        div.appendChild(input);
+        form.appendChild(div);
+      });
+
+      // Mostrar la primera pregunta
+      let currentQuestionIndex = 0;
+      const questions = document.querySelectorAll('.question');
+      questions[currentQuestionIndex].style.display = 'block';
+
+      const btnNext = document.getElementById('next');
+      const btnPrev = document.getElementById('prev');
+      const btnExecute = document.getElementById('execute');
+
+      btnNext.addEventListener('click', () => {
+        questions[currentQuestionIndex].style.display = 'none';
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          questions[currentQuestionIndex].style.display = 'block';
+          btnPrev.style.display = 'inline-block';
+          btnNext.style.display = 'inline-block';
+        }
+        if (currentQuestionIndex === questions.length - 1) {
+          btnNext.style.display = 'none';
+          btnExecute.style.display = 'inline-block';
+        }
+      });
+
+      btnPrev.addEventListener('click', () => {
+        questions[currentQuestionIndex].style.display = 'none';
+        currentQuestionIndex--;
+        if (currentQuestionIndex >= 0) {
+          questions[currentQuestionIndex].style.display = 'block';
+          btnNext.style.display = 'inline-block';
+          btnExecute.style.display = 'none';
+        }
+        if (currentQuestionIndex === 0) {
+          btnPrev.style.display = 'none';
+        }
+      });
+
+      btnExecute.addEventListener('click', () => {
+        let inputs = document.querySelectorAll('.question input');
+        let userInput = {};
+        for (let i = 0; i < inputs.length; i++) {
+          if (inputs[i].checked) {
+            userInput[inputs[i].id] = 1;
+          }
+        }
+
+        let results = neuronalNetwork.run(userInput);
+        let threshold = 0.11; // puedes ajustar este valor según tus necesidades
+        let diseases = [];
+        for (let disease in results) {
+          if (results[disease] > threshold) {
+            diseases.push(disease);
+          }
+        }
+        document.getElementById('result').textContent = diseases.join(', ');
+      });
+
+      neuronalNetwork.train(data);
+    }
+  </script>
+</body>
+</html>
+

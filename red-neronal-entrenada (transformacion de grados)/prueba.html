@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+<body>
+    <h1 id = "texto"></h1>
+</body>
+<script type="text/javascript">
+    var modelo = null;
+    (async () => {
+        console.log('cargando modelo ...');
+        modelo = await tf.loadLayersModel('model.json');
+        console.log('modelo cargado ...');
+
+        var tensor = tf.tensor([0]);
+        var prediction = modelo.predict(tensor).dataSync();
+        //prediction = Math.round(prediction);
+        prediction = prediction[0];
+        console.log(prediction);
+
+
+        document.getElementById('texto').innerHTML = prediction.toFixed(2);
+        //redondear con 2 decimales Math.round(prediction * 100) / 100;
+
+    })();
+
+
+    async function fetchData() {
+        return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('Data fetched');
+        }, 1000);
+        });
+    }
+
+async function main() {
+  try {
+    const data = await fetchData();
+    console.log(data); // 'Data fetched' después de 1 segundo
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+main();
+
+</script>
+</html>

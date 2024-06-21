@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema experto médico</title>
+  <script src="browser.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .question {
+      margin-bottom: 15px;
+    }
+
+    .question label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .result{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .card {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      width: 600px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+      margin: 20px;
+    }
+
+    ul{
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Sistema experto médico</h1>
+  <form id="diagnosisForm">
+    <!-- Las preguntas se generarán aquí -->
+  </form>
+  <button id="execute">Diagnóstico</button>
+  <div id="result" class="result">
+    <h2>Resultados:</h2>
+  </div>
+  <script>
+    window.onload = () => {
+      const neuronalNetwork = new brain.NeuralNetwork();
+
+      const data = [
+        { input: { "fiebre": 1, "tos": 1, "dolorCabeza": 1, 'escalofrios': 1, 'estornudos': 1, 'dolorGarganta': 1 }, output: { "gripe": 1 } },
+        { input: { "fiebre": 1, "tos": 1, "dificultadRespiratoria": 1, 'fatiga': 1, 'perdidaOlfato': 1 }, output: { "COVID-19": 1 } },
+        { input: { "dolorCabeza": 1, "sensibilidadLuz": 1, "nauseas": 1, 'vomito': 1, 'fatiga': 1 }, output: { "migrana": 1 } },
+        { input: { "sedExcesiva": 1, "hambreExcesiva": 1, "orinaFrecuente": 1, 'malAliento': 1, 'cicatrizacionLenta': 1 }, output: { "diabetes": 1 } },
+        { input: { "dolorCabeza": 1, "dificultadRespiratoria": 1, "dolorPecho": 1, 'ansiedad': 1, 'mareos': 1 }, output: { "hipertension": 1 } },
+        { input: { "tos": 1, "dificultadRespiratoria": 1, "sibilancias": 1, 'fatiga': 1, 'desmayos': 1 }, output: { "asma": 1 } },
+        { input: { "dolorArticulaciones": 1, "rigidezArticulaciones": 1, "inflamacionArticulaciones": 1, 'enrojecimiento': 1 }, output: { "artritis": 1 } },
+        { input: { "perdidaMemoria": 1, "confusion": 1, "dificultadHablar": 1 }, output: { "enfermedadDeAlzheimer": 1 } },
+        { input: { "bultoSenos": 1, "cambioTamañoSenos": 1, "dolorSenos": 1 }, output: { "cancerDeMama": 1 } },
+        { input: { "tos": 1, "dolorPecho": 1, "perdidaPeso": 1 }, output: { "cancerDePulmon": 1 } },
+      ];
+
+      let lista_preguntas = [
+        ['¿Tienes fiebre superior a 38 grados?', 'fiebre'],
+        ['¿Tienes tos seca?', 'tos'],
+        ['¿Tienes dolor de cabeza?', 'dolorCabeza'],
+        ['¿Tienes escalofríos?', 'escalofrios'],
+        ['¿Tienes estornudos?', 'estornudos'],
+        ['¿Tienes dolor de garganta?', 'dolorGarganta'],
+        ['¿Tienes dificultad para respirar?', 'dificultadRespiratoria'],
+        ['¿Tienes fatiga?', 'fatiga'],
+        ['¿Tienes pérdida de olfato?', 'perdidaOlfato'],
+        ['¿Tienes sensibilidad a la luz?', 'sensibilidadLuz'],
+        ['¿Tienes náuseas?', 'nauseas'],
+        ['¿Tienes vómito?', 'vomito'],
+        ['¿Tienes sed excesiva?', 'sedExcesiva'],
+        ['¿Tienes hambre excesiva?', 'hambreExcesiva'],
+        ['¿Orinas frecuentemente?', 'orinaFrecuente'],
+        ['¿Tienes mal aliento?', 'malAliento'],
+        ['¿Tienes cicatrización lenta?', 'cicatrizacionLenta'],
+        ['¿Tienes dolor de pecho?', 'dolorPecho'],
+        ['¿Tienes ansiedad?', 'ansiedad'],
+        ['¿Tienes mareos?', 'mareos'],
+        ['¿Tienes sibilancias?', 'sibilancias'],
+        ['¿Tienes desmayos?', 'desmayos'],
+        ['¿Tienes dolor en las articulaciones?', 'dolorArticulaciones'],
+        ['¿Tienes rigidez en las articulaciones?', 'rigidezArticulaciones'],
+        ['¿Tienes inflamación en las articulaciones?', 'inflamacionArticulaciones'],
+        ['¿Tienes enrojecimiento en las articulaciones?', 'enrojecimiento'],
+        ['¿Tienes pérdida de memoria?', 'perdidaMemoria'],
+        ['¿Tienes confusión?', 'confusion'],
+        ['¿Tienes dificultad para hablar?', 'dificultadHablar'],
+        ['¿Tienes bultos en los senos?', 'bultoSenos'],
+        ['¿Tienes cambios en el tamaño de los senos?', 'cambioTamañoSenos'],
+        ['¿Tienes dolor en los senos?', 'dolorSenos'],
+        ['¿Tienes pérdida de peso?', 'perdidaPeso'],
+      ];
+
+      lista_recomendaciones = [
+        ['gripe', ['Guarda reposo en cama', 'Bebe líquidos abundantes', 'Toma medicamentos para la fiebre', 'Evita el consumo de alcohol y tabaco', 'NO USES ANTIBIÓTICOS SIN PRESCRIPCIÓN MÉDICA', 'Evita el contacto con otras personas para no contagiarlas']],
+        ['COVID-19', [ 'Aislarse y llamar a un médico', 'Usar mascarilla', 'Lavarse las manos frecuentemente', 'Evitar el contacto con otras personas para no contagiarlas']],
+        ['migrana', ['Descansar en un lugar oscuro y silencioso', 'Tomar medicamentos para el dolor', 'Evitar alimentos que desencadenen migrañas', 'Hacer ejercicios de relajación', 'Tomar ibuprofeno o paracetamol']],
+        ['diabetes', ['Controlar la glucosa en sangre', 'Hacer ejercicio regularmente', 'Llevar una dieta equilibrada', 'Tomar medicación', 'Evitar el consumo de alcohol y tabaco', 'Controlar la dieta y hacer ejercicio']],
+        ['hipertension', ['Tomar medicación y hacer ejercicio', 'Reduce el exceso de peso', 'Deja de fumar', 'Haz ejercicio regularmente']],
+        ['asma', ['Usar inhaladores', 'Tomar medicación', 'Evitar los desencadenantes', 'Hacer ejercicio', 'Evitar el contacto con alérgenos']],
+        ['artritis', ['Tomar medicación', 'Hacer ejercicio', 'Hacer fisioterapia', 'Hacer ejercicios de estiramiento', 'Hacer ejercicios de fortalecimiento muscular'],],
+        ['enfermedadDeAlzheimer', ['Hacer ejercicios de memoria', 'Hacer ejercicios de lenguaje', 'Hacer ejercicios de orientación', 'Hacer ejercicios de atención', 'Hacer ejercicios de cálculo']],
+        ['cancerDeMama', ['Hacerse una mamografía y llamar a un médico', 'Hacerse una ecografía y llamar a un médico', 'Hacerse una biopsia y llamar a un médico', 'Hacerse una resonancia magnética y llamar a un médico', 'Hacerse una tomografía computarizada y llamar a un médico']],
+        ['cancerDePulmon', ['Hacerse una radiografía de tórax y llamar a un médico', 'Hacerse una tomografía computarizada y llamar a un médico', 'Hacerse una broncoscopia y llamar a un médico', 'Hacerse una biopsia y llamar a un médico', 'Hacerse una resonancia magnética y llamar a un médico']],
+      ]
+      // Generar preguntas en el formulario
+      const form = document.getElementById('diagnosisForm');
+      lista_preguntas.forEach(([pregunta, id]) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        const label = document.createElement('label');
+        label.textContent = pregunta;
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.name = id;
+        div.appendChild(label);
+        div.appendChild(input);
+        form.appendChild(div);
+      });
+
+      neuronalNetwork.train(data);
+
+      const btnExecute = document.getElementById('execute');
+      btnExecute.addEventListener('click', () => {
+        // Recopilar respuestas del formulario
+        const inputs = form.getElementsByTagName('input');
+        let userInput = {};
+        for (let i = 0; i < inputs.length; i++) {
+
+          if (inputs[i].checked) {
+            userInput[inputs[i].id] = 1;
+          }
+        }
+        console.log(userInput);
+
+
+        // Procesar las respuestas con la red neuronal
+        let results = neuronalNetwork.run(userInput);
+        let threshold = 0.15; // puedes ajustar este valor según tus necesidades
+        let diseases = [];
+        for (let disease in results) {
+          if (results[disease] > threshold) {
+            diseases.push(disease);
+          }
+        }
+
+        if (diseases.length > 0) {
+          let renombrar = [['gripe', 'Gripe'], ['COVID-19', 'COVID-19'], ['migrana', 'Migrana'], ['diabetes', 'Diabetes'], ['hipertension', 'Hipertension'], ['asma', 'Asma'], ['artritis', 'Artritis'], ['enfermedadDeAlzheimer', 'Enfermedad de Alzheimer'], ['cancerDeMama', 'Cancer de Mama'], ['cancerDePulmon', 'Cancer de Pulmon']];
+
+          // Mostrar resultados
+          const resultDiv = document.getElementById('result');
+          resultDiv.innerHTML = '';
+          let h2 = document.createElement('h2');
+          h2.textContent = 'Resultados:';
+          resultDiv.appendChild(h2);
+
+          diseases.forEach(disease => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const h2 = document.createElement('h2');
+            h2.textContent = `Diagnóstico tentativo: ${renombrar.find(item => item[0] === disease)[1]}`;
+
+            const h4 = document.createElement('h4');
+            h4.textContent = 'Recomendaciones:';
+
+            const recomendaciones = lista_recomendaciones.find(item => item[0] === disease)[1];
+            const ul = document.createElement('ul');
+            recomendaciones.forEach(recomendacion => {
+              const li = document.createElement('li');
+              li.textContent = recomendacion;
+              ul.appendChild(li);
+            });
+
+            card.appendChild(h2);
+            card.appendChild(h4);
+            card.appendChild(ul);
+            resultDiv.appendChild(card);
+          });
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
